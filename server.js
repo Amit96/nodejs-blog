@@ -6,6 +6,7 @@ var bodyParser = require('body-parser')
 var env = require('dotenv').load()
 var exphbs = require('express-handlebars')
 
+const port = process.env.PORT || 5000;
 
 app.use(express.static('public'))
 
@@ -56,7 +57,7 @@ models.sequelize.sync().then(function() {
 });
 
 
-app.listen(5000, function(err) {
+app.listen(port, function(err) {
     if (!err)
         console.log("Site is live");
     else console.log(err)
