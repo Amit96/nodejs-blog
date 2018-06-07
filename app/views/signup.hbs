@@ -4,9 +4,11 @@
 <head>
     <title></title>
     <link rel = "stylesheet" href = "/css/sign-css.css" type = "text/css">
+    <link rel = "stylesheet" href = "/css/nav-bar.css" type = "text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
-<body>
+<body onLoad="change_focus(this.id,{{c}})">
   {{> header}}
   <div class="wrapper">
     <form id="signup" class = "login-form" name="signup" method="post" action="/signup">

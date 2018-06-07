@@ -28,6 +28,8 @@ module.exports = function(sequelize, Sequelize) {
 
         email: {
             type: Sequelize.STRING,
+            allowNull: false,
+            unique: true,
             validate: {
                 isEmail: true
             }
@@ -49,6 +51,10 @@ module.exports = function(sequelize, Sequelize) {
 
 
     });
+
+    /*User.associate = function(models) {
+        models.user.hasMany(models.stories,{foreignKey: 'email', sourceKey: 'email'});
+    }*/
 
     return User;
 

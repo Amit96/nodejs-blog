@@ -4,25 +4,23 @@ var exports = module.exports = {}
 exports.signup = function(req, res) {
 
     res.render('signup', {
-      home: true,
-      signin: true,
-      signup: false
+      c: 2
     });
 }
 
 exports.signin = function(req, res) {
 
     res.render('signin', {
-      home: true,
-      signin: false,
-      signup: true
+      c: 1
     });
 
 }
 
 exports.dashboard = function(req, res) {
 
-    res.render('dashboard');
+    res.render('dashboard', {
+      logout_button: true
+    });
 
 }
 

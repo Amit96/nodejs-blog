@@ -1,13 +1,29 @@
-<div>
-  <ul style="list-style-type:none">
-    {{#if signup}}
-    <li onclick = "location.href='/signup'">Signup</li>
-    {{/if}}
-    {{#if signin}}
-    <li onclick = "location.href='/signin'">Signin</li>
-    {{/if}}
-    {{#if home}}
-    <li onclick = "location.href='/'">Home</li>
-    {{/if}}
-  </ul>
+<div class="topnav">
+  <a id = "home" href="/">Home</a>
+  {{#if logout_button}}
+  <a id = "logout" href = "/logout"><!--<i class="fa fa-search"></i>-->Logout</a>
+  {{else}}
+  <a id = "signin" href="/signin">Signin</a>
+  <a id = "signup" href="/signup">Signup</a>
+  {{/if}}
+  <div class="search-container">
+    <form action="/action_page.php">
+      <input type="text" placeholder="Search.." name="search">
+      <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+  </div>
 </div>
+
+<script>
+function change_focus(id,c) {
+    var x = document.getElementsByClassName("topnav");
+    var y = x[0].getElementsByTagName("a");
+    for(i = 0; i < y.length; i++) {
+      y[i].className.replace("active", "");
+      if(i==c) {
+        y[i].className += " active";
+      }
+    }
+
+}
+</script>

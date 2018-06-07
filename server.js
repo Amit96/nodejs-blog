@@ -9,6 +9,7 @@ var exphbs = require('express-handlebars')
 var favicon = require('serve-favicon')
 
 const port = process.env.PORT || 5000;
+app.use(express.static(path.join(__dirname, 'bower_components')));
 
 app.use(express.static('public'))
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
@@ -40,11 +41,36 @@ app.set('view engine', '.hbs');
 
 
 app.get('/', function(req, res) {
-    res.render('home', {
-      home: false,
-      signin: true,
-      signup: true
+  if(req.isAuthenticated()) {
+    res.render('dashboard');
+  }
+  else {
+
+    var entry_string = '';
+    models.stories.findAll({
+
+    }).then(function(stories) {
+      console.log(stories[0].dataValues.story);
+      console.log(stories[1].dataValues.story);
+      entry_string = '';
+      for(var i = 0; i < stories.length; i++) {
+        entry_string += '<div class = "entry"><div class = "entry_short_details">';
+        entry_string = entry_string + '<p>' + stories[i].dataValues.email + '</p>';
+        entry_string = entry_string + '<p>' + stories[i].dataValues.story + '</p>';
+        entry_string = entry_string + '<p>' + stories[i].dataValues.createdAt +
+        '&nbsp&nbsp' + stories[i].dataValues.likes + '&nbsp&nbsp' + stories[i].dataValues.dislikes + '</p>';
+        entry_string = entry_string + '</div></div>';
+      }
+      res.render('home', {
+        c:0,
+        entries: entry_string
+      });
+
+    }).catch(function(error) {
+      console.log(error);
     });
+
+  }
 });
 
 //Models
@@ -62,6 +88,7 @@ models.sequelize.sync().then(function() {
 }).catch(function(err) {
     console.log(err, "Something went wrong with the Database Update!")
 });
+
 
 
 app.listen(port, function(err) {
