@@ -42,7 +42,10 @@ app.set('view engine', '.hbs');
 
 app.get('/', function(req, res) {
   if(req.isAuthenticated()) {
-    res.render('dashboard');
+    res.render('dashboard', {
+      logout_button: true,
+      c:0
+    });
   }
   else {
 
@@ -50,11 +53,10 @@ app.get('/', function(req, res) {
     models.stories.findAll({
 
     }).then(function(stories) {
-      console.log(stories[0].dataValues.story);
-      console.log(stories[1].dataValues.story);
+
       entry_string = '';
       for(var i = 0; i < stories.length; i++) {
-        entry_string += '<div class = "entry"><div class = "entry_short_details">';
+        entry_string += '<div class = "entry" onclick = "window.location = \'\/story?id='+stories[i].dataValues.story_id +'\'"><div class = "entry_short_details">';
         entry_string = entry_string + '<p>' + stories[i].dataValues.email + '</p>';
         entry_string = entry_string + '<p>' + stories[i].dataValues.story + '</p>';
         entry_string = entry_string + '<p>' + stories[i].dataValues.createdAt +

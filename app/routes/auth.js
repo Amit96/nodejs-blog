@@ -11,6 +11,12 @@ module.exports = function(app, passport) {
 
     app.get('/logout',authController.logout);
 
+    app.get('/story',authController.story);
+
+
+    app.post('/saveComment',authController.saveComment);
+
+
     app.post('/signup', passport.authenticate('local-signup', {
             successRedirect: '/dashboard',
             failureRedirect: '/signup'
