@@ -13,19 +13,27 @@ module.exports = function(app, passport) {
 
     app.get('/story',authController.story);
 
+    app.post('/save', authController.save);
 
     app.post('/saveComment',authController.saveComment);
 
+    app.post('/getReplies',authController.getReplies);
+
+    app.post('/deleteComment',authController.deleteComment);
+
+
+    app.get('/write',authController.write);
+
 
     app.post('/signup', passport.authenticate('local-signup', {
-            successRedirect: '/dashboard',
+            successRedirect: '/',
             failureRedirect: '/signup'
         }
 
     ));
 
     app.post('/signin', passport.authenticate('local-signin', {
-            successRedirect: '/dashboard',
+            successRedirect: '/',
             failureRedirect: '/signin'
         }
 

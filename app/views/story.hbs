@@ -18,7 +18,7 @@
 
 <body onLoad="change_focus(this.id,{{c}})">
   {{> header}}
-
+<!-- cid(PK,autoincrement) pcid(FK,NULL) comment user(FK,NOT_NULL) story_id(FK,NOT_NULL) replies_exist(bool,NOT_NULL,default=0) -->
   <p style="padding-top:55px;"></p>
   <h2 style="padding-left:55px;">Comments</h2>
 
@@ -42,47 +42,9 @@
   <div class="container">
 
   	<div class="card">
-  	    <div class="card-body">
-  	        <div class="row">
-          	    <!-- <div class="col-md-2">
-          	        <img src="#" class="img img-rounded img-fluid"/>
-          	        <p class="text-secondary text-center">15 Minutes Ago</p>
-          	    </div> -->
-          	    <div class="col-md-10">
-          	        <p>
-          	            <a class="float-left" href="#"><strong>Maniruzzaman Akash</strong></a>
-          	            <span class="float-right"><i class="text-warning fa fa-star"></i></span>
-                          <span class="float-right"><i class="text-warning fa fa-star"></i></span>
-          	            <span class="float-right"><i class="text-warning fa fa-star"></i></span>
-          	            <span class="float-right"><i class="text-warning fa fa-star"></i></span>
+  	    <div class="card-body" id = "card_body">
+          {{{comments}}}
 
-          	       </p>
-          	       <div class="clearfix"></div>
-          	        <p>Lorem Ipsum is simply dummy text of the pr make  but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-          	        <p>
-          	            <a class="float-right btn btn-outline-primary ml-2"> <i class="fa fa-reply"></i> Reply</a>
-          	            <a class="float-right btn text-white btn-danger"> <i class="fa fa-heart"></i> Like</a>
-          	       </p>
-          	    </div>
-  	        </div>
-  	        	<div class="card card-inner">
-              	    <div class="card-body">
-              	        <div class="row">
-                      	    <!-- <div class="col-md-2">
-                      	        <img src="#" class="img img-rounded img-fluid"/>
-                      	        <p class="text-secondary text-center">15 Minutes Ago</p>
-                      	    </div> -->
-                      	    <div class="col-md-10">
-                      	        <p><a href="#"><strong>Maniruzzaman Akash</strong></a></p>
-                      	        <p>Lorem Ipsum is simply dummy text of the pr make  but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-                      	        <p>
-                      	            <a class="float-right btn btn-outline-primary ml-2">  <i class="fa fa-reply"></i> Reply</a>
-                      	            <a class="float-right btn text-white btn-danger"> <i class="fa fa-heart"></i> Like</a>
-                      	       </p>
-                      	    </div>
-              	        </div>
-              	    </div>
-  	            </div>
   	    </div>
   	</div>
   </div>
@@ -96,12 +58,189 @@ function save_comment() {
   	xhttp1.onreadystatechange = function() {
    	if (this.readyState == 4 && this.status == 200) {
 
-		alert(this.responseText);
+    if(this.responseText == "false") {
+      alert("Login needed");
+    }
+    else {
+      var commentobj = JSON.parse(this.responseText)[0];
+      var comment_string;
+      comment_string = '<div class="row" id="' + commentobj.cid + '"><div class="col-md-10" id = "replyadd-' + commentobj.cid + '"><p><a class="float-left" href="#"><strong>' + commentobj.firstname +
+      '</strong></a><span class="float-right"></span><span class="float-right"></span><span class="float-right"></span><span class="float-right"></span></p><div class="clearfix"></div><p>' + commentobj.comment +
+      '</p><p id = "replyaddp-' + commentobj.cid + '"><a class="float-right btn btn-outline-primary ml-2" onclick = "reply_box(this, 1)"> <i class="fa fa-reply"></i> Reply</a>';
+      comment_string = comment_string + '<a class="float-right btn btn-outline-primary ml-2" onclick = "delete_comment(this,1)"> <i class="fa fa-chevron-circle-down"></i> <span id = "delete-' + commentobj.cid + '">Delete</span></a>';
+
+      if(commentobj.replies_exist == '1') {
+        comment_string = comment_string + '<a class="float-right btn btn-outline-primary ml-2" onclick = "view_replies(this,1)"> <i class="fa fa-chevron-circle-down"></i> <span id = "view-' + commentobj.cid + '">View Replies</span></a></p></div></div>';
+      }
+      else {
+        comment_string += '</p></div></div>';
+
+      }
+      document.getElementById("card_body").innerHTML += comment_string;
+      document.getElementById("addComment").value = "";
+    }
   	}
 	};
 	xhttp1.open("POST", "/saveComment", true);
 	xhttp1.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhttp1.send("comment=" + comment);
+	xhttp1.send("comment=" + comment + "&story_id=" + {{id}} + "&reply=-1");
+
+}
+
+
+function view_replies(elem,s) {
+  //alert(s);
+  if(s==1){
+    var cid = elem.parentNode.parentNode.parentNode.id;
+  }
+  else {
+    var cid = elem.parentNode.parentNode.parentNode.parentNode.parentNode.id;
+  }
+  var vieworhide = document.getElementById("view-" + cid).innerHTML;
+  if(vieworhide == "Hide Replies") {
+    var parent = document.getElementById(cid);
+    var clen = parent.childNodes.length;
+    for(var i = 1; i < clen; i++) {
+      var child = parent.childNodes[1];
+      child.parentNode.removeChild(child);
+    }
+
+    //parent.removeChild(parent.childNodes[1]);
+    document.getElementById("view-" + cid).innerHTML = "View Replies";
+
+    return;
+
+
+  }
+
+  var parent = document.getElementById(cid);
+  var clen = parent.childNodes.length;
+  for(var i = 1; i < clen; i++) {
+    var child = parent.childNodes[1];
+    child.parentNode.removeChild(child);
+  }
+  var xhttp1 = new XMLHttpRequest();
+  	xhttp1.onreadystatechange = function() {
+   	if (this.readyState == 4 && this.status == 200) {
+    alert(this.responseText);
+    var data = JSON.parse(this.responseText);
+
+
+    //alert(this.responseText);
+    var replies_str = "";
+    for(var i = 0; i < data.length; i++) {
+      replies_str += '<div class="card card-inner" id="' + data[i].cid + '"><div class="card-body"><div class="row"><div class="col-md-10" id = "replyadd-' + data[i].cid + '"><p><a href="#"><strong>' +  data[i].firstname + '</strong></a></p><p>' + data[i].comment + '</p><p id = "replyaddp-' + data[i].cid + '"><a class="float-right btn btn-outline-primary ml-2" onclick = "reply_box(this, 2)">  <i class="fa fa-reply"></i> Reply</a>';
+      if(data[i].delete == 1) {
+        replies_str = replies_str + '<a class="float-right btn btn-outline-primary ml-2" onclick = "delete_comment(this,2)"> <i class="fa fa-chevron-circle-down"></i> <span id = "delete-' + data[i].cid + '">Delete</span></a>';
+
+      }
+      if(data[i].replies_exist == '1') {
+        replies_str = replies_str + '<a class="float-right btn btn-outline-primary ml-2" onclick = "view_replies(this,2)"> <i class="fa fa-chevron-circle-down"></i> <span id = "view-' + data[i].cid + '">View Replies</span></a></p></div></div></div></div>';
+      }
+      else {
+        replies_str += '</p></div></div></div></div>';
+
+      }
+
+    }
+    document.getElementById(cid).innerHTML += replies_str;
+    document.getElementById("view-" + cid).innerHTML = "Hide Replies";
+  }
+	};
+	xhttp1.open("POST", "/getReplies", true);
+	xhttp1.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhttp1.send("cid=" + cid);
+
+
+}
+
+function save_reply(elem) {
+  var comment = document.getElementById("addReply").value;
+  var pcid = elem.id.split('-')[1];
+  var xhttp1 = new XMLHttpRequest();
+  	xhttp1.onreadystatechange = function() {
+   	if (this.readyState == 4 && this.status == 200) {
+
+    if(this.responseText == "false") {
+      alert("Login needed");
+    }
+    else {
+      //alert(this.responseText);
+      var commentObj = JSON.parse(this.responseText)[0];
+      var reply_str;
+      reply_str = '<div class="card card-inner" id="' + commentObj.cid + '"><div class="card-body"><div class="row"><div class="col-md-10" id = "replyadd-' + commentObj.cid + '"><p><a href="#"><strong>' +  commentObj.firstname + '</strong></a></p><p>' + commentObj.comment + '</p><p id = "replyaddp-' + commentObj.cid + '"><a class="float-right btn btn-outline-primary ml-2" onclick = "reply_box(this, 2)">  <i class="fa fa-reply"></i> Reply</a>';
+      reply_str = reply_str + '<a class="float-right btn btn-outline-primary ml-2" onclick = "delete_comment(this,2)"> <i class="fa fa-chevron-circle-down"></i> <span id = "delete-' + commentObj.cid + '">Delete</span></a>';
+
+      reply_str += '</p></div></div></div></div>';
+      document.getElementById(pcid).innerHTML += reply_str;
+      if(!document.getElementById("replyadd-"+pcid).contains(document.getElementById("view-"+pcid))) {
+        document.getElementById("replyaddp-"+pcid).innerHTML += '<a class="float-right btn btn-outline-primary ml-2" onclick = "view_replies(this,'+ commentObj.s +')"> <i class="fa fa-chevron-circle-down"></i> <span id = "view-' + pcid + '">View Replies</span></a></p></div></div></div></div>';
+      }
+      var child = document.getElementById("reply_box");
+      child.parentNode.removeChild(child);
+    }
+  	}
+	};
+	xhttp1.open("POST", "/saveComment", true);
+	xhttp1.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhttp1.send("comment=" + comment + "&story_id=" + {{id}} + "&reply=1" + "&pcid=" + pcid);
+
+}
+
+
+function reply_box(elem, s) {
+
+  var child = document.getElementById("reply_box");
+  if(child != null) {
+    child.parentNode.removeChild(child);
+  }
+  if(s==1){
+    var cid = elem.parentNode.parentNode.parentNode.id;
+  }
+  else {
+    var cid = elem.parentNode.parentNode.parentNode.parentNode.parentNode.id;
+  }
+  document.getElementById("replyadd-" + cid).innerHTML += '<div class = "form-horizontal" style = "margin-right:100px;" id = "reply_box"><div class="form-group"><label for="email" class="col-sm-2 control-label">Comment</label><div class="col-sm-10"><textarea class="form-control" name="addComment" id="addReply" rows="5"></textarea></div></div><div class="form-group"><div class="col-sm-offset-2 col-sm-10"><button onclick="save_reply(this)" class="btn btn-success btn-circle text-uppercase" id="submitReply-' + cid + '"><span class="glyphicon glyphicon-send"></span> Summit comment</button><button onclick="close_reply_box()" style = "margin-left:10px" class="btn btn-success btn-circle text-uppercase" id="closeReply"><span class="glyphicon glyphicon-send"></span>Close</button></div></div></div>';
+}
+
+
+function close_reply_box() {
+  var child = document.getElementById("reply_box");
+  child.parentNode.removeChild(child);
+
+}
+
+function delete_comment(elem, s) {
+  var r = confirm("Are you sure you want to delete the comment?");
+  if(r == false) {
+    return;
+  }
+  if(s==1){
+    var cid = elem.parentNode.parentNode.parentNode.id;
+  }
+  else {
+    var cid = elem.parentNode.parentNode.parentNode.parentNode.parentNode.id;
+  }
+
+  var xhttp1 = new XMLHttpRequest();
+  xhttp1.onreadystatechange = function() {
+   	if (this.readyState == 4 && this.status == 200) {
+
+      if(this.responseText == "false") {
+        alert("Could not delete");
+      }
+      else {
+        var child = document.getElementById(cid);
+        child.parentNode.removeChild(child);
+
+
+      }
+  	}
+	};
+	xhttp1.open("POST", "/deleteComment", true);
+	xhttp1.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhttp1.send("cid=" + cid);
+
 
 }
 </script>

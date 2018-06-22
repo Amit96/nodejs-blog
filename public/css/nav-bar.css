@@ -102,6 +102,7 @@ body {
   width:100%;
   top:0px;
   height:47px;
+  z-index: 100;
 }
 
 .topnav a {

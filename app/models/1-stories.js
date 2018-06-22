@@ -9,20 +9,20 @@ module.exports = function(sequelize, Sequelize) {
 
         },
 
-        email: {
-            type: Sequelize.STRING,
+        user_id: {
+            type: Sequelize.INTEGER,
             allowNull: false,
             onDelete: 'CASCADE',
             references: {
                   model: 'users',
-                  key: 'email'
+                  key: 'id'
             }
 
         },
 
         title: {
           type: Sequelize.STRING,
-          allowNull: false,
+          allowNull: true,
         },
 
         story: {
@@ -32,13 +32,13 @@ module.exports = function(sequelize, Sequelize) {
 
         label: {
           type: Sequelize.STRING,
-          allowNull: false,
-          get() {
+          allowNull: true,
+          /*get() {
               return this.getDataValue('label').split(';')
           },
           set(val) {
              this.setDataValue('label',val.join(';'));
-          },
+          },*/
         },
 
     });

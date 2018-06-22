@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+* {box-sizing: border-box;}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.topnav {
+  overflow: hidden;
+  background-color: #e9e9e9;
+  position:fixed;
+  width:100%;
+  top:0px;
+}
+
+.topnav a {
+  float: left;
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav input[type=color] {
+  float: left;
+  display: block;
+  color: black;
+  text-align: center;
+  height:47px;
+  text-decoration: none;
+  font-size: 17px;
+
+}
+
+.topnav select {
+  float: left;
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 12px 10px;
+  text-decoration: none;
+  font-size: 17px;
+
+}
+
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.topnav a.active {
+  background-color: #2196F3;
+  color: white;
+}
+
+.topnav .search-container {
+  float: right;
+}
+
+.topnav input[type=text] {
+  padding: 6px;
+  margin-top: 8px;
+  font-size: 17px;
+  border: none;
+}
+
+.topnav .search-container button {
+  float: right;
+  padding: 6px 10px;
+  margin-top: 8px;
+  margin-right: 16px;
+  background: #ddd;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+}
+
+.topnav .search-container button:hover {
+  background: #ccc;
+}
+
+.invisible-box {
+	border: none;
+    overflow: auto;
+	max-height:200px;
+    outline: none;
+
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+	overflow:hidden;
+
+	resize:none;
+}
+
+
+.invisible-box:focus {
+	border:none;
+}
+
+
+.image-div {
+    -moz-appearance: textfield-multiline;
+    -webkit-appearance: textarea;
+    border: 1px solid gray;
+    font: medium -moz-fixed;
+    font: -webkit-small-control;
+    height: 28px;
+    overflow: hidden;
+    //padding: 2px;
+    resize: both;
+    width: 1000px;
+    height: 500px;
+	margin-bottom:10px;
+	margin-top:10px;
+	margin-left:150px;
+}
+
+@media screen and (max-width: 600px) {
+  .topnav .search-container {
+    float: none;
+  }
+  .topnav a, .topnav input[type=text], .topnav .search-container button {
+    float: none;
+    display: block;
+    text-align: left;
+    width: 100%;
+    margin: 0;
+    padding: 14px;
+  }
+  .topnav input[type=text] {
+    border: 1px solid #ccc;
+  }
+}
+</style>
+</head>
+<body>
+
+
+
+<div class="topnav">
+  <a class="active" href="#home">Home</a>
+  <!--<a href="#about">About</a>-->
+  <a onclick = "save()">Save</a>
+  <a id = "image-button" onclick = "document.getElementById('file-input').click();">Image</a>
+  <a id = "bold-button" onclick = "make_change(this.id)"><b>B</b></a>
+  <a id = "italic-button" onclick = "make_change(this.id)"><i>I</i></a>
+  <a id = "underline-button" onclick = "make_change(this.id)"><u>U</u></a>
+  <select id = "font-size-button" onchange = "make_change(this.id, this.value)">
+	<option>16</option>
+	<option>25</option>
+	<option>30</option>
+	<option>35</option>
+	<option>40</option>
+	<option>45</option>
+  </select>
+<select id = "font-family-button" onchange = "make_change(this.id, this.value)">
+	<option>Arial</option>
+	<option>Helvetica</option>
+	<option>Times New Roman</option>
+	<option>Courier</option>
+	<option>Verdana</option>
+	<option>Georgia</option>
+  </select>
+<select id = "align-button" onchange = "align_text(this.id, this.value)">
+	<option>left</option>
+	<option>right</option>
+	<option>center</option>
+	<option>justify</option>
+  </select>
+  <input type = "color" id = "color-button" onchange = "make_change(this.id, this.value)">
+
+
+  <div class="search-container">
+    <form action="/action_page.php">
+      <input type="text" placeholder="Search.." name="search">
+      <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+  </div>
+</div>
+
+
+
+<input id="file-input" type="file" name="name"  onchange = "add_image(this)" style="display: none;" />
+
+<!-- <div style = "margin-top:100px;padding-left:16px" contenteditable="true" id = "tarea-0" class="invisible-box">Title</div> -->
+<div style="padding-left:16px;margin-top:150px;" id = "maindiv">
+  <div contenteditable="true"  id = "tarea-1" class = "invisible-box" autofocus onkeydown = "checkifenter(this.innerHTML, this.id, event)" onclick = "change_focus(this.id)" onmouseup = "save_selected()"></div>
+</div>
+
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script>
+
+
+window.onload = function(){
+	document.getElementById("tarea-1").focus();
+}
+
+
+document.onkeypress = function(event) {
+	alert("WINDOW" + event.keyCode);
+
+
+}
+//check every character entered. get inner html and add at the end
+
+var selectedRange;
+//only one image getting entered
+var num = 1;
+
+var focusid = 1;
+function checkifenter(value, id, event) {
+	alert(event.keyCode);
+	if(event.keyCode == 13) {
+		//alert(event.keyCode);
+		event.preventDefault();
+
+		var tarea = document.createElement("div");
+		tarea.setAttribute("contenteditable", "true");
+		tarea.className += " invisible-box";
+
+		tarea.id = "tarea-" + String(num + 1);
+		num += 1;
+		tarea.setAttribute("onkeydown", "checkifenter(this.innerHTML, this.id, event)");
+		tarea.setAttribute("onclick", "change_focus(this.id)");
+		tarea.setAttribute("onmouseup", "save_selected()");
+
+
+		document.getElementById("tarea-" + String(focusid)).parentNode.insertBefore(tarea, document.getElementById("tarea-" + String(focusid)).nextSibling);
+
+
+		document.getElementById(tarea.id).focus();
+		document.getElementById(tarea.id).click();
+		document.getElementById("image-button").setAttribute("onclick", "document.getElementById('file-input').click();");
+		return;
+
+	}
+	else if(value.length == 1 && event.keyCode == 8) {
+		document.getElementById("image-button").setAttribute("onclick", "document.getElementById('file-input').click();");
+
+	}
+
+
+	else if(value.length == 0 && event.keyCode == 8) {
+		var e = document.getElementById("tarea-" + focusid).previousSibling;
+		document.getElementById("tarea-" + focusid).parentNode.removeChild(document.getElementById("tarea-" + focusid)); //check if its the first child.
+		e.focus();
+		e.click();
+		value = e.innerHTML;
+		if(value.length > 0) {
+			document.getElementById("image-button").onclick = null;
+		}
+		else {
+			document.getElementById("image-button").setAttribute("onclick", "document.getElementById('file-input').click();");
+
+		}
+
+	}
+
+
+	else if(event.keyCode == 32 || event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+				save_selected();
+					alert(selectedRange.startOffset + " " + selectedRange.endOffset);
+
+
+	}
+
+	else {
+		save_selected();
+		alert(selectedRange.startOffset + " " + selectedRange.endOffset);
+		event.preventDefault();
+		var charCode = event.keyCode || event.which;
+   		var charStr = String.fromCharCode(charCode);
+		if(event.shiftKey == false) {
+			charStr = charStr.toLowerCase();
+		}
+		var el = document.getElementById("tarea-" + focusid);
+		var value = el.innerHTML;
+		value = value.replace(/&nbsp;/gi, '\n');
+		var ind = getindex_for_sub(value, selectedRange.startOffset - 1);
+
+
+		value = value.slice(0, ind) + charStr + value.slice(ind);
+		value = value.replace(/\n/gi, "&nbsp;");
+		alert(value + " " + ind);
+		el.innerHTML = value;
+		SetCaretPosition(el, selectedRange.startOffset + 1);
+
+
+
+		document.getElementById("image-button").onclick = null;
+	}
+
+
+	//alert(value + " " + value.length);
+
+	//get cursor position and character there. Also handle backspace and space
+	//shift key producing garbage characters. Prevent that.
+
+
+}
+
+
+function SetCaretPosition(el, pos){
+
+    // Loop through all child nodes
+    for(var node of el.childNodes){
+        if(node.nodeType == 3){ // we have a text node
+            if(node.length >= pos){
+                // finally add our range
+                var range = document.createRange(),
+                    sel = window.getSelection();
+                range.setStart(node,pos);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+                return -1; // we are done
+            }else{
+                pos -= node.length;
+            }
+        }else{
+            pos = SetCaretPosition(node,pos);
+            if(pos == -1){
+                return -1; // no need to finish the for loop
+            }
+        }
+    }
+    return pos; // needed because of recursion stuff
+}
+
+
+
+function change_focus(id) {
+	//alert("here" + focusid);
+
+	/*var e = document.getElementById("tarea-" + focusid);
+
+	if(e != null)
+		e.innerHTML = e.innerHTML.replace('<div><br></div>','');*/
+
+	focusid = parseInt(id.split('-')[1]);
+
+	if(document.getElementById(id).innerHTML.length > 0) {
+			document.getElementById("image-button").onclick = null;
+	}
+	else {
+			document.getElementById("image-button").setAttribute("onclick", "document.getElementById('file-input').click();");
+
+	}
+	//alert(focusid);
+
+
+}
+
+
+
+function add_image(input) {
+
+
+
+
+
+	var elem = document.createElement("div");
+	elem.setAttribute("contenteditable", "true");
+	elem.setAttribute("class", "image-div");
+	var img = document.createElement("img");
+	img.setAttribute("contenteditable", "true");
+	img.height = "500";
+	img.width = "1000";
+	elem.appendChild(img);
+
+	//alert("here1");
+
+	var reader = new FileReader();
+
+        reader.onload = function (e) {
+               	img.setAttribute('src',e.target.result);
+        }
+
+        reader.readAsDataURL(input.files[0]);
+
+
+	var e = document.getElementById("tarea-" + focusid).previousSibling;
+	//alert("in here " + focusid);
+	if(e != null) {
+		e.parentNode.insertBefore(elem, e.nextSibling);
+
+	}
+	else {
+		document.getElementById("maindiv").appendChild(elem);
+	}
+
+
+	document.getElementById("tarea-" + focusid).parentNode.removeChild(document.getElementById("tarea-" + focusid));
+
+
+	var tarea = document.createElement("div");
+	tarea.setAttribute("contenteditable", "true");
+	tarea.className += " invisible-box";
+
+	tarea.id = "tarea-" + String(num + 1);
+	num += 1;
+	tarea.setAttribute("onkeydown", "checkifenter(this.innerHTML, this.id, event)");
+	tarea.setAttribute("onclick", "change_focus(this.id)");
+	tarea.setAttribute("onmouseup", "save_selected()");
+	document.getElementById("maindiv").appendChild(tarea);
+
+	document.getElementById(tarea.id).focus();
+
+	document.getElementById(tarea.id).click();
+
+	//alert(document.getElementById(input.id).files[0].name);
+
+	input.value = "";
+}
+
+function make_change(id, value) {
+	if(!selectedRange || selectedRange.startOffset == selectedRange.endOffset) {
+		return false;
+	}
+	var prop = "";
+	if(id == 'bold-button') {
+		prop = "font-weight:bold;";
+	}
+	else if(id == 'italic-button') {
+		prop = "font-style:italic;";
+	}
+	else if(id == 'underline-button') {
+		prop = "text-decoration:underline;";
+	}
+	else if(id == 'font-size-button') {
+		prop = "font-size:" + value + "px;";
+	}
+	else if(id == 'color-button') {
+		prop = "color:" + value + ";";
+	}
+	else if(id == 'font-family-button') {
+		prop = "font-family:" + value + ";";
+	}
+	var e = document.getElementById("tarea-" + focusid);
+	var value = e.innerHTML;
+
+
+	var index = 0;
+	value = value.replace(/&nbsp;/gi, '\n');
+
+	for(var i = selectedRange.startOffset; i < selectedRange.endOffset; i++) {
+
+		index = getindex(value, i);
+
+
+		if(value.charAt(index) == '\n' || value.charAt(index) == ' ') {
+			continue;
+
+		}
+
+		if(nospan(index, value)) {
+			value = addspan(value, index);
+			index += 17;
+		}
+		value = addprop(value, index, prop);
+
+
+
+
+	}
+
+
+	value = value.replace(/\n/gi, "&nbsp;");
+
+	alert("final-" + value);
+
+	e.innerHTML = value;
+
+	selectedRange = null;
+}
+
+
+function addspan(value, index) {
+
+	var new_val = value;
+
+
+
+
+	new_val = [new_val.slice(0, index), '<span style = "">', new_val.slice(index)].join('');
+	new_val = [new_val.slice(0, (index + 18)), "</span>", new_val.slice((index + 18))].join('');
+
+
+
+
+	return new_val;
+}
+
+function nospan(i, value) {
+	if(value.substr(i - 7, 7) == "</span>") {
+		return true;
+
+	}
+	else if(value.charAt(i - 1) != '>') {
+		return true;
+	}
+
+	return false;
+
+}
+
+function getindex(value, j) {
+    start = j;
+    var start1 = 0, start2 = 0, inhtml = false, i = 0;
+
+
+    while (i < value.length) {
+
+
+  	if(value.charAt(i) == '<') {
+
+		inhtml = true;
+
+
+	}
+	else if(value.charAt(i) == '>' && inhtml == true) {
+
+		inhtml = false;
+
+	}
+	else if(inhtml == false) {
+
+		start2++;
+
+	}
+	if(start2 == (start + 1)) {
+
+		break;
+	}
+
+	start1++;
+	i++;
+    }
+
+
+	return start1;
+
+}
+function getindex_for_sub(value, j) {
+    start = j;
+    var start1 = 0, start2 = 0, inhtml = false, i = 0;
+
+
+    while (i < value.length) {
+
+
+  	if(value.charAt(i) == '<') {
+
+		inhtml = true;
+
+
+	}
+	else if(value.charAt(i) == '>' && inhtml == true) {
+
+		inhtml = false;
+
+	}
+	else if(inhtml == false) {
+
+		start2++;
+
+	}
+	if(start2 == (start + 1)) {
+
+		break;
+	}
+
+	start1++;
+	i++;
+    }
+
+	if(value.substr(i + 1, 7) == "</span>") {
+		start1 += 8;
+
+	}
+	else {
+		start1++;
+	}
+	return start1;
+
+}
+
+function addprop(value, index, prop) {
+
+	var new_val = value, start = index - 1;
+	while(value.charAt(start) != '<') {
+
+		start--;
+
+
+	}
+
+	var span = value.slice(start, index);
+
+
+
+	if(prop.split(":")[0] == "font-size") {
+		if(span.indexOf(prop.split(":")[0]) != -1) {
+			span = span.replace(/font-size:(.)*px;/gi, prop);
+			new_val = [new_val.slice(0, start), span, new_val.slice(index)].join('');
+			return new_val;
+		}
+
+
+	}
+
+	if(prop.split(":")[0] == "color") {
+		if(span.indexOf(prop.split(":")[0]) != -1) {
+			span = span.replace(/color:(.)*;/gi, prop);
+			new_val = [new_val.slice(0, start), span, new_val.slice(index)].join('');
+			return new_val;
+		}
+
+
+	}
+
+	if(prop.split(":")[0] == "font-family") {
+		if(span.indexOf(prop.split(":")[0]) != -1) {
+			span = span.replace(/font-family:(.)*;/gi, prop);
+			new_val = [new_val.slice(0, start), span, new_val.slice(index)].join('');
+			return new_val;
+		}
+
+
+	}
+
+
+
+	if(span.indexOf(prop) == -1) {
+
+		new_val = [new_val.slice(0, index - 2), prop, new_val.slice(index - 2)].join('');
+	}
+	else {
+		span = span.split(prop).join('');
+		new_val = [new_val.slice(0, start), span, new_val.slice(index)].join('');
+
+	}
+
+	return new_val;
+
+}
+
+
+function align_text(id, value) {
+	document.getElementById("tarea-" + focusid).style.textAlign = value;
+
+
+}
+
+
+function save_selected() {
+
+	var selected = window.getSelection().toString();
+	//selectedRange = window.getSelection().getRangeAt(0);
+
+	var out = getSelectionCharacterOffsetWithin();
+	selectedRange = {};
+	selectedRange.startOffset = out.start;
+	selectedRange.endOffset = out.end;
+
+	//alert("selected " + selected + " " + selectedRange.startOffset + " " + selectedRange.endOffset);
+	//alert(out.start + " " + out.end);
+}
+
+
+function getSelectionCharacterOffsetWithin() {
+    var element = document.getElementById("tarea-" + focusid);
+    var start = 0;
+    var end = 0;
+    var doc = element.ownerDocument || element.document;
+    var win = doc.defaultView || doc.parentWindow;
+    var sel;
+    if (typeof win.getSelection != "undefined") {
+        sel = win.getSelection();
+        if (sel.rangeCount > 0) {
+            var range = win.getSelection().getRangeAt(0);
+            var preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(element);
+            preCaretRange.setEnd(range.startContainer, range.startOffset);
+            start = preCaretRange.toString().length;
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            end = preCaretRange.toString().length;
+        }
+    } else if ( (sel = doc.selection) && sel.type != "Control") {
+        var textRange = sel.createRange();
+        var preCaretTextRange = doc.body.createTextRange();
+        preCaretTextRange.moveToElementText(element);
+        preCaretTextRange.setEndPoint("EndToStart", textRange);
+        start = preCaretTextRange.text.length;
+        preCaretTextRange.setEndPoint("EndToEnd", textRange);
+        end = preCaretTextRange.text.length;
+    }
+
+
+
+
+    return { start: start, end: end};
+}
+
+function save() {
+	var code = document.getElementById("maindiv").innerHTML;
+  alert(code);
+  var title = document.getElementById("tarea-1").innerHTML;
+
+	var xhttp1 = new XMLHttpRequest();
+	xhttp1.onreadystatechange = function () {
+		if (this.readyState == 4 && this.status == 200) {
+
+		//var myObj = JSON.parse(this.responseText);
+
+
+
+
+			alert(this.reponseText);
+
+
+    	}
+  	};
+  	xhttp1.open("POST", "/save", true);
+	xhttp1.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  	xhttp1.send("code=" + code + "&title=" + title);
+
+
+}
+
+</script>
+
+</body>
+</html>
